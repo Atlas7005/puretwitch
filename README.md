@@ -2,7 +2,7 @@
 Remove all the sexual content from Twitch.tv, such as bikini streams, twerking streams, and streamers that show too much cleavage.
 
 ## Installation
-1. Download the latest version of [Pure Twitch](https://github.com/Atlas7005/puretwitch/releases/download/latest/puretwitch.zip) from the releases page.
+1. Download the latest version of [Pure Twitch](https://github.com/Atlas7005/puretwitch/releases/latest/download/puretwitch.zip) from the releases page.
 2. Extract the zip file.
 3. Open the extensions page in your browser.
 4. Enable developer mode.
