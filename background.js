@@ -1,14 +1,13 @@
 let debugee = null;
-const addMode = false;
 const debugMode = false;
 const twitchRegex = /https:\/\/(www\.)?twitch\.tv\/directory\/.+/i;
 
 let hiddenChannelIds;
 function updateTubbers() {
     fetch('https://atlas7005.github.io/puretwitch/list.json')
-        .then(response => response.json())
+        .then(response => response.text())
         .then(data => {
-            hiddenChannelIds = data;
+            hiddenChannelIds = JSON.parse(data.replace(/\/\/.+/g, ''));
         }).catch(err => {
             console.log(err);
         });
@@ -24,18 +23,12 @@ function removeStreams(response, isGame) {
         const filteredOutUsernames = data.game.streams.edges.filter((x) => hiddenChannelIds.includes(x.node.broadcaster.id)).map((x) => x.node.broadcaster.displayName);
         console.log(`Hid ${data.game.streams.edges.length - filtered.length} stream${data.game.streams.edges.length - filtered.length === 1 ? '' : 's'}`, filteredOutUsernames);
         data.game.streams.edges = filtered;
-        addMode === true && data.game.streams.edges.forEach((x) => {
-            console.log(`${x.node.broadcaster.displayName} (${x.node.broadcaster.login}): ${x.node.broadcaster.id}`);
-        });
     } else {
         if(!data.streams) return response;
         const filtered = data.streams.edges.filter((x) => !hiddenChannelIds.includes(x.node.broadcaster.id));
         const filteredOutUsernames = data.streams.edges.filter((x) => hiddenChannelIds.includes(x.node.broadcaster.id)).map((x) => x.node.broadcaster.displayName);
         console.log(`Hid ${data.streams.edges.length - filtered.length} stream${data.streams.edges.length - filtered.length === 1 ? '' : 's'}`, filteredOutUsernames);
         data.streams.edges = filtered;
-        addMode === true && data.streams.edges.forEach((x) => {
-            console.log(`${x.node.broadcaster.displayName} (${x.node.broadcaster.login}): ${x.node.broadcaster.id}`);
-        });
     }
 
     rawData.forEach((x, idx, arr) => {
