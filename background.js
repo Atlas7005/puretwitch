@@ -14,7 +14,7 @@ function updateTubbers() {
         });
 };
 
-function removeThots(response, isGame) {
+function removeStreams(response, isGame) {
     const rawData = JSON.parse(response.response);
     const data = rawData.find((x) => x.extensions.operationName === 'DirectoryPage_Game' || x.extensions.operationName === 'BrowsePage_Popular').data;
 
@@ -22,7 +22,7 @@ function removeThots(response, isGame) {
         if(!data.game.streams) return response;
         const filtered = data.game.streams.edges.filter((x) => !hiddenChannelIds.includes(x.node.broadcaster.id));
         const filteredOutUsernames = data.game.streams.edges.filter((x) => hiddenChannelIds.includes(x.node.broadcaster.id)).map((x) => x.node.broadcaster.displayName);
-        console.log(`Hid ${data.game.streams.edges.length - filtered.length} thot${data.game.streams.edges.length - filtered.length === 1 ? '' : 's'}`, filteredOutUsernames);
+        console.log(`Hid ${data.game.streams.edges.length - filtered.length} stream${data.game.streams.edges.length - filtered.length === 1 ? '' : 's'}`, filteredOutUsernames);
         data.game.streams.edges = filtered;
         addMode === true && data.game.streams.edges.forEach((x) => {
             console.log(`${x.node.broadcaster.displayName} (${x.node.broadcaster.login}): ${x.node.broadcaster.id}`);
@@ -31,7 +31,7 @@ function removeThots(response, isGame) {
         if(!data.streams) return response;
         const filtered = data.streams.edges.filter((x) => !hiddenChannelIds.includes(x.node.broadcaster.id));
         const filteredOutUsernames = data.streams.edges.filter((x) => hiddenChannelIds.includes(x.node.broadcaster.id)).map((x) => x.node.broadcaster.displayName);
-        console.log(`Hid ${data.streams.edges.length - filtered.length} thot${data.streams.edges.length - filtered.length === 1 ? '' : 's'}`, filteredOutUsernames);
+        console.log(`Hid ${data.streams.edges.length - filtered.length} stream${data.streams.edges.length - filtered.length === 1 ? '' : 's'}`, filteredOutUsernames);
         data.streams.edges = filtered;
         addMode === true && data.streams.edges.forEach((x) => {
             console.log(`${x.node.broadcaster.displayName} (${x.node.broadcaster.login}): ${x.node.broadcaster.id}`);
@@ -99,7 +99,7 @@ function startDebugger() {
                 debugMode === true && console.log('Request intercepted', request);
                 if(method === "Fetch.requestPaused") {
                     ajaxMe(request.url, request.headers, request.method, request.postData, function (response) {
-                        let newReponse = removeThots(response, request.postData.toLowerCase().includes(`"operationname":"directorypage_game"`));
+                        let newReponse = removeStreams(response, request.postData.toLowerCase().includes(`"operationname":"directorypage_game"`));
                         continueParams.responseCode = 200;
                         continueParams.binaryResponseHeaders = btoa(unescape(encodeURIComponent(response.headers.replace(/(?:\r\n|\r|\n)/g, '\0'))));
                         continueParams.body = btoa(unescape(encodeURIComponent(newReponse.response)));
