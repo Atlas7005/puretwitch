@@ -1,4 +1,5 @@
 let debugee = null;
+let version = chrome.runtime.getManifest().version;
 const debugMode = false;
 const twitchRegex = /https:\/\/(www\.)?twitch\.tv\/.+/i;
 
@@ -11,6 +12,35 @@ function updateTubbers() {
         }).catch(err => {
             console.log(err);
         });
+};
+
+function checkForUpdates() {
+    fetch("https://api.github.com/repos/atlas7005/puretwitch/releases/latest")
+        .then(response => response.json())
+        .then(data => {
+            if(isNewerVersion(version, data.tag_name.replace("v", ""))) {
+                chrome.notifications.create({
+                    type: "basic",
+                    title: "Pure Twitch",
+                    iconUrl: "logo.png",
+                    message: `Update available: ${data.name}`
+                });
+            }
+        }).catch(err => {
+            console.log(err);
+        });
+};
+
+function isNewerVersion (oldVer, newVer) {
+    const oldParts = oldVer.split('.')
+    const newParts = newVer.split('.')
+    for (var i = 0; i < newParts.length; i++) {
+        const a = ~~newParts[i] // parse int
+        const b = ~~oldParts[i] // parse int
+        if (a > b) return true
+        if (a < b) return false
+    }
+    return false
 };
 
 const operationFilters = {
@@ -197,3 +227,5 @@ chrome.debugger.onDetach.addListener(function (source, reason) {
 
 updateTubbers();
 setInterval(updateTubbers, 1000 * 60 * 3); // update every 3 minutes
+checkForUpdates();
+setInterval(checkForUpdates, 1000 * 60 * 60 * 1); // check for updates every 1 hour
