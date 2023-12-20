@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Pure Twitch - Remove the NSFW streams from Twitch</title>
+
+        <meta name="description" content="Remove all the sexual content from Twitch.tv, such as bikini streams, twerking streams, and streamers that show too much cleavage.">
+        <meta name="keywords" content="twitch, nsfw, remove, bikini, twerking, cleavage, sexual, content, streams, streamers, pure, puretwitch, pure twitch, pure-twitch, pure_twitch, puretwitch.com, pure-twitch.com, pure_twitch.com">
+        <meta name="author" content="AtlasDevelopment">
+        <meta name="robots" content="index, follow">
+
+        <meta property="og:title" content="Pure Twitch - Remove the NSFW streams from Twitch">
+        <meta property="og:description" content="Remove all the sexual content from Twitch.tv, such as bikini streams, twerking streams, and streamers that show too much cleavage.">
+        <meta property="og:url" content="https://atlas7005.github.com/puretwitch">
+        <meta property="og:type" content="website">
+
+        <meta name="twitter:title" content="Pure Twitch - Remove the NSFW streams from Twitch">
+        <meta name="twitter:description" content="Remove all the sexual content from Twitch.tv, such as bikini streams, twerking streams, and streamers that show too much cleavage.">
+
+        <link href="https://fonts.googleapis.com/css?family=Inter:100,200,300,regular,500,600,700,800,900" rel="stylesheet" />
+        <link rel="stylesheet" href="style.css">
+    </head>
+    <body>
+        <main>
+            <h1>Pure Twitch</h1>
+            <h2>Remove the NSFW streams from Twitch</h2>
+            <p>Remove all the sexual content from Twitch.tv, such as bikini streams, twerking streams, and streamers that show too much cleavage.</p>
+            <h2>How it works</h2>
+            <p>Whenever your browser asks Twitch for a list of streams on the Browse page, the extension will filter out any streams that are listed in the <a href="https://github.com/Atlas7005/puretwitch/raw/master/list.json" target="_blank">blocklist</a> from the response.</p>
+            <h2>How to install</h2>
+            <ol>
+                <li><a href="https://github.com/Atlas7005/puretwitch/releases/latest/download/puretwitch.zip">Download the latest version of Pure Twitch from the releases page.</a></li>
+                <li>Extract the zip file.</li>
+                <li>Open the extensions page in your browser.</li>
+                <li>Enable developer mode.</li>
+                <li>Click "Load unpacked extension".</li>
+                <li>Select the folder you extracted the zip file to.</li>
+                <li>Add <code>--silent-debugger-extension-api</code> to the end of your Chrome shortcut (after the quotes).</li>
+                <li>If you don't do this, you will get a warning every time you open Twitch, and if you close the warning, the extension will not work.</li>
+                <li>Restart Chrome.</li>
+                <li>Enjoy!</li>
+            </ol>
+            <h2>Did we miss a stream or accidentally block a stream?</h2>
+            <p>Let us know by <a href="https://github.com/Atlas7005/puretwitch/issues/new">creating an issue on GitHub</a>.</p>
+        </main>
+        
+        <footer>
+            <p>Made by <a href="https://github.com/Atlas7005" target="_blank">Atlas</a></p>
+        </footer>
+    </body>
+</html>
