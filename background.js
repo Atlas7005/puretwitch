@@ -4,7 +4,7 @@ const debugMode = false;
 const twitchRegex = /https:\/\/(www\.)?twitch\.tv\/.+/i;
 
 let hiddenChannelIds;
-function updateTubbers() {
+function updateStreamers() {
     fetch("https://atlas7005.github.io/puretwitch/list.json")
         .then(response => response.text())
         .then(data => {
@@ -116,6 +116,7 @@ const operationFilters = {
 
 function removeStreams(response) {
     const rawData = JSON.parse(response.response);
+    if(!Array.isArray(rawData)) return response;
     const types = rawData.map((x) => x.extensions.operationName);
 
     types.forEach((type, index) => {
@@ -225,7 +226,7 @@ chrome.debugger.onDetach.addListener(function (source, reason) {
     }
 });
 
-updateTubbers();
-setInterval(updateTubbers, 1000 * 60 * 3); // update every 3 minutes
+updateStreamers();
+setInterval(updateStreamers, 1000 * 60 * 3); // update every 3 minutes
 checkForUpdates();
-setInterval(checkForUpdates, 1000 * 60 * 60 * 1); // check for updates every 1 hour
+setInterval(checkForUpdates, 1000 * 60 * 60); // check for updates every hour
