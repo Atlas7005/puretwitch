@@ -1,46 +1,100 @@
 let debugee = null;
 const debugMode = false;
-const twitchRegex = /https:\/\/(www\.)?twitch\.tv\/directory\/.+/i;
+const twitchRegex = /https:\/\/(www\.)?twitch\.tv\/.+/i;
 
 let hiddenChannelIds;
 function updateTubbers() {
-    fetch('https://atlas7005.github.io/puretwitch/list.json')
+    fetch("https://atlas7005.github.io/puretwitch/list.json")
         .then(response => response.text())
         .then(data => {
-            hiddenChannelIds = JSON.parse(data.replace(/\/\/.+/g, ''));
+            hiddenChannelIds = JSON.parse(data.replace(/\/\/.+/g, ""));
         }).catch(err => {
             console.log(err);
         });
 };
 
-function removeStreams(response, isGame) {
-    const rawData = JSON.parse(response.response);
-    const data = rawData.find((x) => x.extensions.operationName === 'DirectoryPage_Game' || x.extensions.operationName === 'BrowsePage_Popular').data;
-
-    if (isGame) {
-        if(!data.game.streams) return response;
+const operationFilters = {
+    "DirectoryPage_Game": (data) => {
+        if(!data.game.streams) return data;
         const filtered = data.game.streams.edges.filter((x) => !hiddenChannelIds.includes(x.node.broadcaster.id));
         const filteredOutUsernames = data.game.streams.edges.filter((x) => hiddenChannelIds.includes(x.node.broadcaster.id)).map((x) => x.node.broadcaster.displayName);
-        console.log(`Hid ${data.game.streams.edges.length - filtered.length} stream${data.game.streams.edges.length - filtered.length === 1 ? '' : 's'}`, filteredOutUsernames);
+        console.log(`Filtered ${data.game.streams.edges.length - filtered.length} stream${data.game.streams.edges.length - filtered.length === 1 ? "" : "s"} (DirectoryPage_Game)`, filteredOutUsernames);
         data.game.streams.edges = filtered;
-    } else {
-        if(!data.streams) return response;
+        return data;
+    },
+    "BrowsePage_Popular": (data) => {
+        if(!data.streams) return data;
         const filtered = data.streams.edges.filter((x) => !hiddenChannelIds.includes(x.node.broadcaster.id));
         const filteredOutUsernames = data.streams.edges.filter((x) => hiddenChannelIds.includes(x.node.broadcaster.id)).map((x) => x.node.broadcaster.displayName);
-        console.log(`Hid ${data.streams.edges.length - filtered.length} stream${data.streams.edges.length - filtered.length === 1 ? '' : 's'}`, filteredOutUsernames);
+        console.log(`Filtered ${data.streams.edges.length - filtered.length} stream${data.streams.edges.length - filtered.length === 1 ? "" : "s"} (BrowsePage_Popular)`, filteredOutUsernames);
         data.streams.edges = filtered;
+        return data;
+    },
+    "PersonalSections": (data) => {
+        if(!data.personalSections) return data;
+        const filteredFollowed = data.personalSections[0].items.filter((x) => !hiddenChannelIds.includes(x.user.id));
+        const filteredFollowedUsernames = data.personalSections[0].items.filter((x) => hiddenChannelIds.includes(x.user.id)).map((x) => x.user.displayName);
+        const filteredRecommended = data.personalSections[1].items.filter((x) => !hiddenChannelIds.includes(x.user.id));
+        const filteredRecommendedUsernames = data.personalSections[1].items.filter((x) => hiddenChannelIds.includes(x.user.id)).map((x) => x.user.displayName);
+        console.log(`Filtered ${data.personalSections[0].items.length - filteredFollowed.length} followed stream${data.personalSections[0].items.length - filteredFollowed.length === 1 ? "" : "s"} (PersonalSections[0]`, filteredFollowedUsernames);
+        console.log(`Filtered ${data.personalSections[1].items.length - filteredRecommended.length} recommended stream${data.personalSections[1].items.length - filteredRecommended.length === 1 ? "" : "s"} (PersonalSections[1])`, filteredRecommendedUsernames);
+        data.personalSections[0].items = filteredFollowed;
+        data.personalSections[1].items = filteredRecommended;
+        return data;
+    },
+    "FollowingLive_CurrentUser": (data) => {
+        if(!data?.currentUser?.followedLiveUsers?.edges) return data;
+        const filtered = data.currentUser.followedLiveUsers.edges.filter((x) => !hiddenChannelIds.includes(x.node.id));
+        const filteredOutUsernames = data.currentUser.followedLiveUsers.edges.filter((x) => hiddenChannelIds.includes(x.node.id)).map((x) => x.node.displayName);
+        console.log(`Filtered ${data.currentUser.followedLiveUsers.edges.length - filtered.length} stream${data.currentUser.followedLiveUsers.edges.length - filtered.length === 1 ? "" : "s"} (FollowingLive_CurrentUser)`, filteredOutUsernames);
+        data.currentUser.followedLiveUsers.edges = filtered;
+        return data;
+    },
+    "FollowedVideos_CurrentUser": (data) => {
+        if(!data?.currentUser?.followedVideos?.edges) return data;
+        const filtered = data.currentUser.followedVideos.edges.filter((x) => !hiddenChannelIds.includes(x.node.owner.id));
+        const filteredOutUsernames = data.currentUser.followedVideos.edges.filter((x) => hiddenChannelIds.includes(x.node.owner.id)).map((x) => x.node.owner.displayName);
+        console.log(`Filtered ${data.currentUser.followedVideos.edges.length - filtered.length} stream${data.currentUser.followedVideos.edges.length - filtered.length === 1 ? "" : "s"} (FollowedVideos_CurrentUser)`, filteredOutUsernames);
+        data.currentUser.followedVideos.edges = filtered;
+        return data;
+    },
+    "FollowingPage_RecommendedChannels": (data) => {
+        if(!data?.currentUser?.recommendations?.liveRecommendations?.edges) return data;
+        const filtered = data.currentUser.recommendations.liveRecommendations.edges.filter((x) => !hiddenChannelIds.includes(x.node.broadcaster.id));
+        const filteredOutUsernames = data.currentUser.recommendations.liveRecommendations.edges.filter((x) => hiddenChannelIds.includes(x.node.broadcaster.id)).map((x) => x.node.broadcaster.displayName);
+        console.log(`Filtered ${data.currentUser.recommendations.liveRecommendations.edges.length - filtered.length} stream${data.currentUser.recommendations.liveRecommendations.edges.length - filtered.length === 1 ? "" : "s"} (FollowingPage_RecommendedChannels)`, filteredOutUsernames);
+        data.currentUser.recommendations.liveRecommendations.edges = filtered;
+        return data;
+    },
+    "FollowedStreamsContinueWatching": (data) => {
+        if(!data?.currentUser?.viewedVideos?.edges) return data;
+        const filtered = data.currentUser.viewedVideos.edges.filter((x) => !hiddenChannelIds.includes(x.node.owner.id));
+        const filteredOutUsernames = data.currentUser.viewedVideos.edges.filter((x) => hiddenChannelIds.includes(x.node.owner.id)).map((x) => x.node.owner.displayName);
+        console.log(`Filtered ${data.currentUser.viewedVideos.edges.length - filtered.length} stream${data.currentUser.viewedVideos.edges.length - filtered.length === 1 ? "" : "s"} (FollowedStreamsContinueWatching)`, filteredOutUsernames);
+        data.currentUser.viewedVideos.edges = filtered;
+        return data;
+    },
+    "FollowedStreams": (data) => {
+        if(!data?.followedUpcomingStreams?.edges) return data;
+        const filtered = data.followedUpcomingStreams.edges.filter((x) => !hiddenChannelIds.includes(x.node.channel.owner.id));
+        const filteredOutUsernames = data.followedUpcomingStreams.edges.filter((x) => hiddenChannelIds.includes(x.node.channel.owner.id)).map((x) => x.node.channel.owner.displayName);
+        console.log(`Filtered ${data.followedUpcomingStreams.edges.length - filtered.length} stream${data.followedUpcomingStreams.edges.length - filtered.length === 1 ? "" : "s"} (FollowedStreams)`, filteredOutUsernames);
+        data.followedUpcomingStreams.edges = filtered;
+        return data;
     }
+};
 
-    rawData.forEach((x, idx, arr) => {
-        if (x.extensions.operationName === 'DirectoryPage_Game') {
-            rawData[idx].data.game.streams.edges = data.game.streams.edges;
-        } else if (x.extensions.operationName === 'BrowsePage_Popular') {
-            rawData[idx].data.streams.edges = data.streams.edges;
+function removeStreams(response) {
+    const rawData = JSON.parse(response.response);
+    const types = rawData.map((x) => x.extensions.operationName);
+
+    types.forEach((type, index) => {
+        if(operationFilters[type]) {
+            rawData[index].data = operationFilters[type](rawData[index].data);
         }
     });
 
     response.response = JSON.stringify(rawData);
-    
     return response;
 };
 
@@ -56,9 +110,9 @@ async function ajaxMe(url, headers, method, postData, success, error) {
     let finalResponse = {};
     let response = await fetch(url, {
         method,
-        mode: 'cors',
+        mode: "cors",
         headers,
-        redirect: 'follow',
+        redirect: "follow",
         body: postData
     });
     finalResponse.response = await response.text();
@@ -71,10 +125,10 @@ async function ajaxMe(url, headers, method, postData, success, error) {
 };
 
 function startDebugger() {
-    if(debugee) return console.log('Debugger already attached');
+    if(debugee) return console.log("Debugger already attached");
     chrome.tabs.query({}, function (tabs) {
         const tab = tabs.find((tab) => tab.url.match(twitchRegex));
-        if(!tab) return console.log('No twitch tabs found');
+        if(!tab) return console.log("No twitch tabs found");
         debugee = { tabId: tab.id };
 
         chrome.debugger.attach(debugee, "1.3", function () {
@@ -82,27 +136,28 @@ function startDebugger() {
         });
 
         chrome.debugger.onEvent.addListener(function (source, method, params) {
-            debugMode === true && console.log('Event', source, method, params);
+            debugMode === true && console.log("Event", source, method, params);
             var request = params.request;
             var continueParams = {
                 requestId: params.requestId
             };
 
-            if(source.tabId === debugee.tabId && request.postData && (request.postData.toLowerCase().includes(`"operationname":"browsepage_popular"`) || request.postData.toLowerCase().includes(`"operationname":"directorypage_game"`))) {
-                debugMode === true && console.log('Request intercepted', request);
+            if(source.tabId === debugee.tabId && request.postData) {
                 if(method === "Fetch.requestPaused") {
+                    debugMode === true && console.log("Request intercepted", request);
                     ajaxMe(request.url, request.headers, request.method, request.postData, function (response) {
-                        let newReponse = removeStreams(response, request.postData.toLowerCase().includes(`"operationname":"directorypage_game"`));
+                        let newReponse = removeStreams(response);
                         continueParams.responseCode = 200;
-                        continueParams.binaryResponseHeaders = btoa(unescape(encodeURIComponent(response.headers.replace(/(?:\r\n|\r|\n)/g, '\0'))));
+                        continueParams.binaryResponseHeaders = btoa(unescape(encodeURIComponent(response.headers.replace(/(?:\r\n|\r|\n)/g, "\0"))));
                         continueParams.body = btoa(unescape(encodeURIComponent(newReponse.response)));
-                        chrome.debugger.sendCommand(debugee, 'Fetch.fulfillRequest', continueParams);
+                        chrome.debugger.sendCommand(debugee, "Fetch.fulfillRequest", continueParams);
                     }, function (status) {
-                        chrome.debugger.sendCommand(debugee, 'Fetch.continueRequest', continueParams);
+                        console.log("Error", status, request);
+                        chrome.debugger.sendCommand(debugee, "Fetch.continueRequest", continueParams);
                     });
                 }
             } else {
-                chrome.debugger.sendCommand(debugee, 'Fetch.continueRequest', continueParams);
+                chrome.debugger.sendCommand(debugee, "Fetch.continueRequest", continueParams);
             }
         });
     });
@@ -122,7 +177,7 @@ chrome.tabs.onCreated.addListener(function (tab) {
 });
 
 chrome.tabs.onUpdated.addListener(function (tabId, changeInfo, tab) {
-    if (tab.url.match(twitchRegex) && debugee === null && (changeInfo.status === 'complete' || changeInfo.status === 'loading')) {
+    if (tab.url.match(twitchRegex) && debugee === null && (changeInfo.status === "complete" || changeInfo.status === "loading")) {
         startDebugger();
     }
 });
@@ -134,7 +189,7 @@ chrome.tabs.onRemoved.addListener(function (tabId, removeInfo) {
 });
 
 chrome.debugger.onDetach.addListener(function (source, reason) {
-    debugMode === true && console.log('Debugger detached', source, reason);
+    debugMode === true && console.log("Debugger detached", source, reason);
     if (debugee) {
         stopDebugger();
     }
