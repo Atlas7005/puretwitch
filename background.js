@@ -1,5 +1,6 @@
-let debugee = null;
+let debuggees = {};
 let version = chrome.runtime.getManifest().version;
+let handledIds = {};
 const debugMode = false;
 const twitchRegex = /https:\/\/(www\.)?twitch\.tv\/.+/i;
 
@@ -10,7 +11,7 @@ function updateStreamers() {
         .then(data => {
             hiddenChannelIds = JSON.parse(data.replace(/\/\/.+/g, ""));
         }).catch(err => {
-            console.log(err);
+            console.error(err);
         });
 };
 
@@ -27,7 +28,7 @@ function checkForUpdates() {
                 });
             }
         }).catch(err => {
-            console.log(err);
+            console.error(err);
         });
 };
 
@@ -161,15 +162,17 @@ async function ajaxMe(url, headers, method, postData, success, error) {
     }
 };
 
-function startDebugger() {
-    if(debugee) return console.log("Debugger already attached");
-    chrome.tabs.query({}, function (tabs) {
-        const tab = tabs.find((tab) => tab.url.match(twitchRegex));
+function startDebugger(tabId) {
+    if(debuggees[tabId]) return console.log("Debugger already attached to", tabId);
+    chrome.tabs.get(tabId, function (tab) {
         if(!tab) return console.log("No twitch tabs found");
-        debugee = { tabId: tab.id };
+        debuggees[tabId] = { tabId: tab.id };
+        handledIds[tabId] = new Set();
 
-        chrome.debugger.attach(debugee, "1.3", function () {
-            chrome.debugger.sendCommand(debugee, "Fetch.enable", { patterns: [{ urlPattern: "https://gql.twitch.tv/gql" }] });
+        chrome.debugger.attach(debuggees[tabId], "1.3", function () {
+            chrome.debugger.sendCommand(debuggees[tabId], "Fetch.enable", { patterns: [{ urlPattern: "https://gql.twitch.tv/gql" }] }).catch((err) => {
+                console.error(err);
+            });
         });
 
         chrome.debugger.onEvent.addListener(function (source, method, params) {
@@ -179,7 +182,7 @@ function startDebugger() {
                 requestId: params.requestId
             };
 
-            if(source.tabId === debugee.tabId && request.postData) {
+            if(source.tabId === debuggees[tabId].tabId && request.postData) {
                 if(method === "Fetch.requestPaused") {
                     debugMode === true && console.log("Request intercepted", request);
                     ajaxMe(request.url, request.headers, request.method, request.postData, function (response) {
@@ -187,48 +190,76 @@ function startDebugger() {
                         continueParams.responseCode = 200;
                         continueParams.binaryResponseHeaders = btoa(unescape(encodeURIComponent(response.headers.replace(/(?:\r\n|\r|\n)/g, "\0"))));
                         continueParams.body = btoa(unescape(encodeURIComponent(newReponse.response)));
-                        chrome.debugger.sendCommand(debugee, "Fetch.fulfillRequest", continueParams);
+                        if(!handledIds[tabId].has(params.requestId)) {
+                            chrome.debugger.sendCommand(debuggees[tabId], "Fetch.fulfillRequest", continueParams).catch((err) => {
+                                console.error(err);
+                            });
+                            handledIds[tabId].add(params.requestId);
+                        } else {
+                            chrome.debugger.sendCommand(debuggees[tabId], "Fetch.continueRequest", continueParams).catch((err) => {
+                                console.error(err);
+                            });
+                        }
                     }, function (status) {
-                        console.log("Error", status, request);
-                        chrome.debugger.sendCommand(debugee, "Fetch.continueRequest", continueParams);
+                        console.error("Error", status, request);
+                        if (!handledIds[tabId].has(request.requestId)) {
+                            chrome.debugger.sendCommand(debuggees[tabId], "Fetch.continueRequest", continueParams).catch((err) => {
+                                console.error(err);
+                            });
+                            handledIds[tabId].add(request.requestId);
+                        }
                     });
                 }
             } else {
-                chrome.debugger.sendCommand(debugee, "Fetch.continueRequest", continueParams);
+                chrome.debugger.sendCommand(debuggees[tabId], "Fetch.continueRequest", continueParams).catch((err) => {
+                    console.error(err);
+                });
             }
         });
     });
 };
 
-function stopDebugger() {
-    if (debugee) {
-        chrome.debugger.detach(debugee);
-        debugee = null;
+function stopDebugger(tabId) {
+    if (debuggees[tabId]) {
+        chrome.debugger.detach(debuggees[tabId]).catch((err) => {
+            console.error(err);
+        });
+        delete debuggees[tabId];
+        handledIds[tabId].clear();
+        delete handledIds[tabId];
     }
 };
 
 chrome.tabs.onCreated.addListener(function (tab) {
-    if (tab.url.match(twitchRegex) && debugee === null) {
-        startDebugger();
+    debugMode === true && console.log("Tab created", tab);
+    if (tab.url.match(twitchRegex) && debuggees[tab.id] == null) {
+        startDebugger(tab.id);
     }
 });
 
 chrome.tabs.onUpdated.addListener(function (tabId, changeInfo, tab) {
-    if (tab.url.match(twitchRegex) && debugee === null && (changeInfo.status === "complete" || changeInfo.status === "loading")) {
-        startDebugger();
+    debugMode === true && console.log("Tab updated", tabId, changeInfo, tab);
+    if (tab.url.match(twitchRegex) && debuggees[tabId] == null && (changeInfo.status === "complete" || changeInfo.status === "loading")) {
+        startDebugger(tabId);
     }
 });
 
 chrome.tabs.onRemoved.addListener(function (tabId, removeInfo) {
-    if (debugee && tabId === debugee.tabId) {
-        stopDebugger();
+    debugMode === true && console.log("Tab removed", tabId, removeInfo);
+    if (debuggees[tabId] && tabId === debuggees[tabId].tabId) {
+        stopDebugger(tabId);
     }
 });
 
 chrome.debugger.onDetach.addListener(function (source, reason) {
     debugMode === true && console.log("Debugger detached", source, reason);
-    if (debugee) {
-        stopDebugger();
+    if (debuggees[source.tabId]) {
+        delete debuggees[tabId];
+    }
+
+    if (handledIds[source.tabId]) {
+        handledIds[source.tabId].clear();
+        delete handledIds[source.tabId];
     }
 });
 
