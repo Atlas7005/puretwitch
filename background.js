@@ -6,10 +6,10 @@ const twitchRegex = /https:\/\/(www\.)?twitch\.tv\/.+/i;
 
 let hiddenChannelIds;
 function updateStreamers() {
-    fetch("https://atlas7005.github.io/puretwitch/list.json")
-        .then(response => response.text())
+    fetch("https://pure.atlasdev.men/?ids=true")
+        .then(response => response.json())
         .then(data => {
-            hiddenChannelIds = JSON.parse(data.replace(/\/\/.+/g, ""));
+            hiddenChannelIds = data;
         }).catch(err => {
             console.error(err);
         });
@@ -182,8 +182,8 @@ function startDebugger(tabId) {
                 requestId: params.requestId
             };
 
-            if(source.tabId === debuggees[tabId].tabId && request.postData) {
-                if(method === "Fetch.requestPaused") {
+            if(method === "Fetch.requestPaused") {
+                if(source.tabId === debuggees[tabId].tabId && request.postData) {
                     debugMode === true && console.log("Request intercepted", request);
                     ajaxMe(request.url, request.headers, request.method, request.postData, function (response) {
                         let newReponse = removeStreams(response);
@@ -209,11 +209,11 @@ function startDebugger(tabId) {
                             handledIds[tabId].add(request.requestId);
                         }
                     });
+                } else {
+                    chrome.debugger.sendCommand(debuggees[tabId], "Fetch.continueRequest", continueParams).catch((err) => {
+                        console.error(err);
+                    });
                 }
-            } else {
-                chrome.debugger.sendCommand(debuggees[tabId], "Fetch.continueRequest", continueParams).catch((err) => {
-                    console.error(err);
-                });
             }
         });
     });
