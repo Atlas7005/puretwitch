@@ -2,7 +2,7 @@
 Remove all the sexual content from Twitch.tv, such as bikini streams, twerking streams, and streamers that show too much cleavage.
 
 ## How it works
-Whenever your browser asks Twitch for a list of streams on the Browse page, the extension will filter out any streams that are listed in the [blocklist](list.json) from the response.
+Whenever your browser asks Twitch for a list of streams on the Browse page, the extension will filter out any streams that are listed in the [blocklist](https://pure.atlasdev.men/) from the response.
 
 ## Installation
 1. Download the latest version of [Pure Twitch](https://github.com/Atlas7005/puretwitch/releases/latest/download/puretwitch.zip) from the releases page.
