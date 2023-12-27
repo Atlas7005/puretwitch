@@ -65,10 +65,13 @@ const operationFilters = {
         if(!data.personalSections) return data;
         const filteredFollowed = data.personalSections[0].items.filter((x) => !hiddenChannelIds.includes(x.user.id));
         const filteredFollowedUsernames = data.personalSections[0].items.filter((x) => hiddenChannelIds.includes(x.user.id)).map((x) => x.user.displayName);
-        const filteredRecommended = data.personalSections[1].items.filter((x) => !hiddenChannelIds.includes(x.user.id));
-        const filteredRecommendedUsernames = data.personalSections[1].items.filter((x) => hiddenChannelIds.includes(x.user.id)).map((x) => x.user.displayName);
         console.log(`Filtered ${data.personalSections[0].items.length - filteredFollowed.length} followed stream${data.personalSections[0].items.length - filteredFollowed.length === 1 ? "" : "s"} (PersonalSections[0]`, filteredFollowedUsernames);
-        console.log(`Filtered ${data.personalSections[1].items.length - filteredRecommended.length} recommended stream${data.personalSections[1].items.length - filteredRecommended.length === 1 ? "" : "s"} (PersonalSections[1])`, filteredRecommendedUsernames);
+        if(data.personalSections[1] && data.personalSections[1].items) {
+            const filteredRecommended = data.personalSections[1].items.filter((x) => !hiddenChannelIds.includes(x.user.id));
+            const filteredRecommendedUsernames = data.personalSections[1].items.filter((x) => hiddenChannelIds.includes(x.user.id)).map((x) => x.user.displayName);
+            console.log(`Filtered ${data.personalSections[1].items.length - filteredRecommended.length} recommended stream${data.personalSections[1].items.length - filteredRecommended.length === 1 ? "" : "s"} (PersonalSections[1])`, filteredRecommendedUsernames);
+            data.personalSections[1].items = filteredRecommended;
+        }
         if(data.personalSections[2] && data.personalSections[2].items) {
             const filteredSimilar = data.personalSections[2].items.filter((x) => !hiddenChannelIds.includes(x.user.id));
             const filteredSimilarUsernames = data.personalSections[2].items.filter((x) => hiddenChannelIds.includes(x.user.id)).map((x) => x.user.displayName);
@@ -76,7 +79,6 @@ const operationFilters = {
             data.personalSections[2].items = filteredSimilar;
         }
         data.personalSections[0].items = filteredFollowed;
-        data.personalSections[1].items = filteredRecommended;
         return data;
     },
     "FollowingLive_CurrentUser": (data) => {
