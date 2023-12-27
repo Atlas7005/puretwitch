@@ -4,7 +4,6 @@
     "description": "Pure Twitch removes all the sexual content, such as bikini streams, twerking streams, and streamers that show too much cleavage.",
     "version": "2.4.5",
     "permissions": [
-        "webRequest",
         "tabs",
         "debugger",
         "activeTab",
