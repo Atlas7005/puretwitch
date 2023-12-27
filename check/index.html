@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Check block status - Pure Twitch</title>
+
+        <meta name="description" content="Remove all the sexual content from Twitch.tv, such as bikini streams, twerking streams, and streamers that show too much cleavage.">
+        <meta name="keywords" content="twitch, nsfw, remove, bikini, twerking, cleavage, sexual, content, streams, streamers, pure, puretwitch, pure twitch, pure-twitch, pure_twitch, puretwitch.com, pure-twitch.com, pure_twitch.com">
+        <meta name="author" content="AtlasDevelopment">
+        <meta name="robots" content="index, follow">
+
+        <meta property="og:title" content="Check block status - Pure Twitch">
+        <meta property="og:description" content="Remove all the sexual content from Twitch.tv, such as bikini streams, twerking streams, and streamers that show too much cleavage.">
+        <meta property="og:url" content="https://atlas7005.github.com/puretwitch">
+        <meta property="og:type" content="website">
+
+        <meta name="twitter:title" content="Check block status - Pure Twitch">
+        <meta name="twitter:description" content="Remove all the sexual content from Twitch.tv, such as bikini streams, twerking streams, and streamers that show too much cleavage.">
+
+        <link href="https://fonts.googleapis.com/css?family=Inter:100,200,300,regular,500,600,700,800,900" rel="stylesheet" />
+        <link rel="stylesheet" href="/style.css">
+    </head>
+    <body>
+        <main>
+            <input type="text" name="query" id="query" placeholder="Username or User ID">
+            <button id="check">Check</button>
+            <p id="result"></p>
+        </main>
+        
+        <footer>
+            <p>Made by <a href="https://github.com/Atlas7005" target="_blank">Atlas</a></p>
+        </footer>
+
+        <script>
+            document.getElementById("check").onclick = e => {
+                const query = document.getElementById("query");
+                if (!query.value) return;
+                if (query.value.length < 0) return alert("Query must be at least 1 character long.");
+
+                fetch(`https://pure.atlasdev.men/check/${query.value}`)
+                    .then(res => res.json())
+                    .then(res => {
+                        if (res.exists) {
+                            document.getElementById("result").innerHTML = "Blocked";
+                        } else {
+                            document.getElementById("result").innerHTML = "Not blocked";
+                        }
+                    })
+                    .catch(err => document.getElementById("result").innerHTML = `Error: ${err}`);
+            }
+        </script>
+    </body>
+</html>

@@ -4,6 +4,10 @@
     box-sizing: border-box;
 }
 
+:focus {
+    outline: none;
+}
+
 html {
     font-family: "Inter", sans-serif;
     color: #e7e7e7;
@@ -64,6 +68,37 @@ code {
     padding: 0.2rem 0.4rem;
     border-radius: 0.2rem;
     user-select: all;
+}
+
+input[type=text] {
+    background-color: #1e1e23;
+    border: none;
+    border-radius: 0.2rem;
+    padding: 0.5rem 1rem;
+    color: #e7e7e7;
+    font-size: 1rem;
+    margin: 0 auto;
+    width: 300px;
+}
+
+button {
+    background-color: #1e1e23;
+    border: none;
+    border-radius: 0.2rem;
+    padding: 0.5rem 1rem;
+    color: #e7e7e7;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: background-color 0.2s ease-in-out;
+    margin-top: .5rem;
+    margin-bottom: 0;
+    margin-left: auto;
+    margin-right: auto;
+    width: 300px;
+}
+
+button:hover {
+    background-color: #2e2e33;
 }
 
 footer {
