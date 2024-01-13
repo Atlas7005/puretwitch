@@ -169,54 +169,12 @@ function startDebugger(tabId) {
     chrome.tabs.get(tabId, function (tab) {
         if(!tab) return console.log("No twitch tabs found");
         debuggees[tabId] = { tabId: tab.id };
-        handledIds[tabId] = new Set();
+        if(!handledIds[tabId]) handledIds[tabId] = new Set();
 
         chrome.debugger.attach(debuggees[tabId], "1.3", function () {
             chrome.debugger.sendCommand(debuggees[tabId], "Fetch.enable", { patterns: [{ urlPattern: "https://gql.twitch.tv/gql" }] }).catch((err) => {
                 console.error(err);
             });
-        });
-
-        chrome.debugger.onEvent.addListener(function (source, method, params) {
-            debugMode === true && console.log("Event", source, method, params);
-            var request = params.request;
-            var continueParams = {
-                requestId: params.requestId
-            };
-
-            if(method === "Fetch.requestPaused") {
-                if(source.tabId === debuggees[tabId].tabId && request.postData) {
-                    debugMode === true && console.log("Request intercepted", request);
-                    ajaxMe(request.url, request.headers, request.method, request.postData, function (response) {
-                        let newReponse = removeStreams(response);
-                        continueParams.responseCode = 200;
-                        continueParams.binaryResponseHeaders = btoa(unescape(encodeURIComponent(response.headers.replace(/(?:\r\n|\r|\n)/g, "\0"))));
-                        continueParams.body = btoa(unescape(encodeURIComponent(newReponse.response)));
-                        if(!handledIds[tabId].has(params.requestId)) {
-                            chrome.debugger.sendCommand(debuggees[tabId], "Fetch.fulfillRequest", continueParams).catch((err) => {
-                                console.error(err);
-                            });
-                            handledIds[tabId].add(params.requestId);
-                        } else {
-                            chrome.debugger.sendCommand(debuggees[tabId], "Fetch.continueRequest", continueParams).catch((err) => {
-                                console.error(err);
-                            });
-                        }
-                    }, function (status) {
-                        console.error("Error", status, request);
-                        if (!handledIds[tabId].has(request.requestId)) {
-                            chrome.debugger.sendCommand(debuggees[tabId], "Fetch.continueRequest", continueParams).catch((err) => {
-                                console.error(err);
-                            });
-                            handledIds[tabId].add(request.requestId);
-                        }
-                    });
-                } else {
-                    chrome.debugger.sendCommand(debuggees[tabId], "Fetch.continueRequest", continueParams).catch((err) => {
-                        console.error(err);
-                    });
-                }
-            }
         });
     });
 };
@@ -231,6 +189,51 @@ function stopDebugger(tabId) {
         delete handledIds[tabId];
     }
 };
+
+chrome.debugger.onEvent.addListener(function (source, method, params) {
+    let tabId = source.tabId;
+    if(!debuggees[tabId]) return;
+    
+    debugMode === true && console.log("Event", source, method, params);
+    var request = params.request;
+    var continueParams = {
+        requestId: params.requestId
+    };
+
+    if(method === "Fetch.requestPaused") {
+        if(request.postData) {
+            debugMode === true && console.log("Request intercepted", request);
+            ajaxMe(request.url, request.headers, request.method, request.postData, function (response) {
+                let newReponse = removeStreams(response);
+                continueParams.responseCode = 200;
+                continueParams.binaryResponseHeaders = btoa(unescape(encodeURIComponent(response.headers.replace(/(?:\r\n|\r|\n)/g, "\0"))));
+                continueParams.body = btoa(unescape(encodeURIComponent(newReponse.response)));
+                if(!handledIds[tabId].has(params.requestId)) {
+                    chrome.debugger.sendCommand(debuggees[tabId], "Fetch.fulfillRequest", continueParams).catch((err) => {
+                        console.error(err);
+                    });
+                    handledIds[tabId].add(params.requestId);
+                } else {
+                    chrome.debugger.sendCommand(debuggees[tabId], "Fetch.continueRequest", continueParams).catch((err) => {
+                        console.error(err);
+                    });
+                }
+            }, function (status) {
+                console.error("Error", status, request);
+                if (!handledIds[tabId].has(request.requestId)) {
+                    chrome.debugger.sendCommand(debuggees[tabId], "Fetch.continueRequest", continueParams).catch((err) => {
+                        console.error(err);
+                    });
+                    handledIds[tabId].add(request.requestId);
+                }
+            });
+        } else {
+            chrome.debugger.sendCommand(debuggees[tabId], "Fetch.continueRequest", continueParams).catch((err) => {
+                console.error(err);
+            });
+        }
+    }
+});
 
 chrome.tabs.onCreated.addListener(function (tab) {
     debugMode === true && console.log("Tab created", tab);
