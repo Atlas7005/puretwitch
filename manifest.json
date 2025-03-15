@@ -1,18 +1,26 @@
 {
     "manifest_version": 3,
     "name": "Pure Twitch",
-    "description": "Pure Twitch removes all the sexual content, such as bikini streams, twerking streams, and streamers that show too much cleavage.",
-    "version": "2.4.7",
-    "permissions": [
-        "tabs",
-        "debugger",
-        "activeTab",
-        "notifications"
+    "description": "Remove all the sexual content from Twitch.tv, such as bikini streams, twerking streams, and streamers that show too much cleavage.",
+    "version": "3.0.0",
+    "content_scripts": [
+        {
+            "js": [
+                "utils.js",
+                "script.js"
+            ],
+            "matches": [
+                "https://*.twitch.tv/*"
+            ]
+        }
     ],
-    "background": {
-        "service_worker": "background.js"
+    "browser_specific_settings": {
+        "gecko": {
+            "id": "atlas@atlasdev.men"
+        }
     },
-    "host_permissions": [
-        "https://*.twitch.tv/*"
-    ]
+    "icons": {
+        "32": "logo@1x.png",
+        "64": "logo@2x.png"
+    }
 }
