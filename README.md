@@ -1,3 +1,7 @@
+<p align="center">
+  <img src="logo.png" alt="Pure Twitch Logo" width="300"/>
+</p>
+
 # Pure Twitch
 
 Remove all the sexual content from Twitch.tv, such as bikini streams, twerking streams, and streamers that show too much cleavage.
