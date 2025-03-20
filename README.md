@@ -8,9 +8,19 @@ Pure Twitch is a browser extension that checks each stream on Twitch.tv against 
 
 ## Installation
 
-1. Download the latest version of the extension from the [Chrome Web Store](https://chromewebstore.google.com/detail/ejihgokacjmjhihjppdomnagfilijfke/), or [Firefox Add-ons](https://addons.mozilla.org/en-US/firefox/addon/pure-twitch/).
+1. Download the latest version of the extension from the [Chrome Web Store](https://chromewebstore.google.com/detail/ejihgokacjmjhihjppdomnagfilijfke/), [Firefox Add-ons](https://addons.mozilla.org/en-US/firefox/addon/pure-twitch/), or [manually](#manual-installation).
 2. Install the extension in your browser.
 3. Visit [Twitch.tv](https://www.twitch.tv/) and enjoy a cleaner Twitch experience.
+
+## Manual Installation
+
+### Chrome
+
+1. Clone this repository.
+2. Open Chrome and go to `chrome://extensions/`.
+3. Enable "Developer mode" in the top right corner.
+4. Click "Load unpacked" and select repo folder.
+5. The extension should now be installed and active.
 
 ## Missed a stream or accidentally blocked a safe streamer?
 
