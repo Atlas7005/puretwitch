@@ -27,7 +27,7 @@ let pathRegex = {
 };
 
 let pureTwitch = {
-    URL: `https://pure.atlasdev.men/?usernames=true`,
+    URL: `https://puretwitch.atlasdev.men/api/streamers/`,
     usernameBlocklist: [],
     getRouteFromPath(path) {
         let route = null;
@@ -43,8 +43,8 @@ let pureTwitch = {
     fetchBlockedUsernames() {
         fetch(pureTwitch.URL)
             .then((response) => response.json())
-            .then((data) => {
-                pureTwitch.usernameBlocklist = data;
+            .then(({ data }) => {
+                pureTwitch.usernameBlocklist = Object.values(data);
                 pureTwitch.log("Blocked usernames fetched!");
             }).catch((error) => {
                 pureTwitch.error("Failed to fetch blocked usernames:", error);
