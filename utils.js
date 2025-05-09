@@ -21,9 +21,9 @@ let pathRegex = {
     [routes.DIRECTORY_ALL]: /^\/directory\/all(?:\/.+)?/,
     [routes.DIRECTORY_CATEGORY]: /^\/directory\/category\/.+/,
     [routes.DIRECTORY_COLLECTION]: /^\/directory\/collection\/.+/,
-    [routes.DIRECTORY_FOLLOWING]: /^\/directory\/following$/,
-    [routes.DIRECTORY_FOLLOWING_LIVE]: /^\/directory\/following\/live$/,
-    [routes.DIRECTORY_FOLLOWING_VIDEOS]: /^\/directory\/following\/videos$/,
+    [routes.DIRECTORY_FOLLOWING]: /^\/directory\/following\/?$/,
+    [routes.DIRECTORY_FOLLOWING_LIVE]: /^\/directory\/following\/live\/?$/,
+    [routes.DIRECTORY_FOLLOWING_VIDEOS]: /^\/directory\/following\/videos\/?$/,
 };
 
 let pureTwitch = {
