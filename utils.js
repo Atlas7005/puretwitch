@@ -18,7 +18,7 @@ let routes = {
 
 let pathRegex = {
     [routes.HOMEPAGE]: /^\/$/,
-    [routes.DIRECTORY_ALL]: /^\/directory\/all\/.+/,
+    [routes.DIRECTORY_ALL]: /^\/directory\/all\/(?:.+)?/,
     [routes.DIRECTORY_CATEGORY]: /^\/directory\/category\/.+/,
     [routes.DIRECTORY_COLLECTION]: /^\/directory\/collection\/.+/,
     [routes.DIRECTORY_FOLLOWING]: /^\/directory\/following$/,
