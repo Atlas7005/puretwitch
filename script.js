@@ -55,7 +55,7 @@ async function main() {
         case routes.DIRECTORY_CATEGORY:
         case routes.DIRECTORY_COLLECTION:
             watchers.directories = new MutationObserver(() => {
-                const directoryLinks = document.querySelectorAll(".tw-tower [data-target='']:not([style*='display: none']) a[data-test-selector='TitleAndChannel']:not([data-pt-processed])");
+                const directoryLinks = document.querySelectorAll(".tw-tower [data-target='']:not([style*='display: none']) a[data-test-selector='TitleAndChannel']:not([data-pt-processed]), .tw-tower [data-target='directory-first-item']:not([style*='display: none']) a[data-test-selector='TitleAndChannel']:not([data-pt-processed])");
                 let usernames = new Set();
 
                 for (const link of directoryLinks) {
@@ -69,8 +69,19 @@ async function main() {
                     if (!link) continue;
                     if (!link.hasAttribute("data-pt-processed")) link.setAttribute("data-pt-processed", "");
                     if (!blocked) continue;
-                    const parent = link.closest("[data-target='']");
+                    const parent = link.closest("[data-target=''], [data-target='directory-first-item']");
                     if (link && parent && parent.style.display !== "none") {
+                        if (parent.getAttribute("data-target") === "directory-first-item") {
+                            let next = parent.nextElementSibling;
+                            while (next && next.style.display === "none") {
+                                next = next.nextElementSibling;
+                            }
+                            if (next) {
+                                next.setAttribute("data-target", "directory-first-item");
+                            }
+
+                            parent.setAttribute("data-target", "");
+                        }
                         parent.style.display = "none";
                         pureTwitch.log(`Removed ${username} from directory`);
                     }
