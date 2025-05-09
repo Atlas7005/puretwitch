@@ -10,6 +10,7 @@ document.addEventListener("pathChange", main);
 let watchers = {
     sidebar: null,
     directories: null,
+    followingOverview: null,
 };
 
 async function main() {
@@ -90,7 +91,31 @@ async function main() {
             watchers.directories.observe(document.querySelector("[data-a-target='root-scroller']"), { childList: true, subtree: true });
             break;
         case routes.DIRECTORY_FOLLOWING:
-            // TODO: Implement
+            watchers.followingOverview = new MutationObserver(() => {
+                const followingLiveLinks = document.querySelectorAll("#following-page-main-content > div:nth-child(1) > div:nth-child(1) > div:nth-child(2) > .tw-tower .live-channel-card a[data-test-selector='TitleAndChannel']:not([data-pt-processed])");
+                // TODO: Add support for recommended channels section
+                // const recommendedChannelLinks = document.querySelectorAll(".find-me > div:nth-child(2) > div:nth-child(1) > .tw-tower .shelf-card__impression-wrapper a[data-test-selector='TitleAndChannel']:not([data-pt-processed])");
+                let usernames = new Set();
+
+                for (const link of followingLiveLinks) {
+                    const username = link.href.split("/").pop();
+                    usernames.add(username);
+                }
+
+                const blockedUsernames = pureTwitch.batchBlockCheck([...usernames]);
+                for (const { username, blocked } of blockedUsernames) {
+                    const link = document.querySelector(`#following-page-main-content .tw-tower a[href$="${username}"]`);
+                    if (!link) continue;
+                    if (!link.hasAttribute("data-pt-processed")) link.setAttribute("data-pt-processed", "");
+                    if (!blocked) continue;
+                    const parent = link.closest(".live-channel-card").parentElement;
+                    if (link && parent && parent.style.display !== "none") {
+                        parent.style.display = "none";
+                        pureTwitch.log(`Removed ${username} from following overview live section`);
+                    }
+                }
+            });
+            watchers.followingOverview.observe(document.querySelector("[data-a-target='root-scroller']"), { childList: true, subtree: true });
             break;
         case routes.DIRECTORY_FOLLOWING_LIVE:
             // TODO: Implement
