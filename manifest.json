@@ -1,8 +1,8 @@
 {
     "manifest_version": 3,
     "name": "Pure Twitch",
-    "description": "Remove all the sexual content from Twitch.tv, such as bikini streams, twerking streams, and streamers that show too much cleavage.",
-    "version": "4.0.0",
+    "description": "Protect your Twitch browsing experience by automatically hiding sexually explicit streamers from your feed.",
+    "version": "4.1.0",
     "content_scripts": [
         {
             "js": [
