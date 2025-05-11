@@ -4,19 +4,22 @@
 
 # Pure Twitch
 
-Remove all the sexual content from Twitch.tv, such as bikini streams, twerking streams, and streamers that show too much cleavage.
+Protect your Twitch browsing experience by automatically hiding sexually explicit streamers from your feed.
 
 ## How it works
 
-Pure Twitch is a browser extension that checks each stream on Twitch.tv against a blocklist of streamers that are known to show sexual content. If a streamer is on the blocklist, the stream will be hidden from the user.
+Pure Twitch is a browser extension that automatically filters out sexually explicit streamers from your Twitch feed. It's powered by a community-driven blocklist, helping create a cleaner and more focused viewing experience for everyone.
 
 ## Installation
 
-1. Download the latest version of the extension from the [Chrome Web Store](https://chromewebstore.google.com/detail/ejihgokacjmjhihjppdomnagfilijfke/), [Firefox Add-ons](https://addons.mozilla.org/en-US/firefox/addon/pure-twitch/), or [manually](#manual-installation).
+1. Download the latest version of the extension from the [Chrome Web Store](https://chromewebstore.google.com/detail/bchkamfikpklohgbpbifiahncdcnadne/), [Firefox Add-ons](https://addons.mozilla.org/en-US/firefox/addon/pure-twitch/), or [manually](#manual-installation).
 2. Install the extension in your browser.
 3. Visit [Twitch.tv](https://www.twitch.tv/) and enjoy a cleaner Twitch experience.
 
 ## Manual Installation
+
+Beware that manual installation is not recommended for most users. It is only provided for advanced users who want to test the extension without going through the official stores.
+You will not receive automatic updates, and you will need to manually update the extension when a new version is released.
 
 ### Chrome
 
@@ -28,7 +31,7 @@ Pure Twitch is a browser extension that checks each stream on Twitch.tv against 
 
 ## Missed a stream or accidentally blocked a safe streamer?
 
-If I missed a stream or accidentally blocked a safe streamer, please [open an issue](https://github.com/Atlas7005/puretwitch/issues/new) and I will investigate.
+If I missed a stream or accidentally blocked a safe streamer, please [open an issue](https://github.com/Atlas7005/puretwitch/issues/new) or [report them on the site](https://puretwitch.tv/#report) and I will investigate.
 
 ## License
 
