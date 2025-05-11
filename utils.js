@@ -27,7 +27,7 @@ let pathRegex = {
 };
 
 let pureTwitch = {
-    URL: `https://puretwitch.atlasdev.men/api/streamers/`,
+    URL: `https://puretwitch.tv/api/streamers/`,
     usernameBlocklist: [],
     getRouteFromPath(path) {
         let route = null;
